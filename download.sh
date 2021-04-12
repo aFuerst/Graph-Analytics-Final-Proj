@@ -8,3 +8,4 @@ mkdir -p $social
 
 # http://snap.stanford.edu/data/soc-sign-bitcoin-otc.html
 wget https://snap.stanford.edu/data/soc-sign-bitcoinotc.csv.gz -O "$social/soc-sign-bitcoinotc.csv.gz" 
+gzip -d "$social/soc-sign-bitcoinotc.csv.gz"
