@@ -8,9 +8,10 @@ CC	=  gcc -std=c11  -fopenmp
 LIB = -lgraphblas -llagraph
 WFLAGS	= -Wall
 
+OPTS = -O3
 CCFLAGS	= $(OPTS) $(WFLAGS) $(DEFS) $(INCLUDE)
 
-SOURCES		= main.c
+SOURCES		= $(wildcard *.c)
 
 OBJECTS		= $(SOURCES:.c=.o)
 TARGETS		= $(SOURCES:.c=.exe)
@@ -20,7 +21,7 @@ PCHS		= $(HEADERS:=.gch)
 
 .PHONY		: all clean
 
-all		: $(TARGETS)
+all		: exe
 
 %.s 		: %.c $(HEADERS)
 		$(CC) -S $(CCFLAGS) $<
@@ -28,8 +29,8 @@ all		: $(TARGETS)
 %.o  		: %.c $(HEADERS)
 		$(CC) -c $(CCFLAGS) $<
 
-%.exe  		: %.o
-		$(CC) $^ -o $@ $(LIB)
+exe  		: $(OBJECTS)
+		$(CC) $(OBJECTS) -o main.exe $(LIB)
 
 clean		:
 		/bin/rm -rf a.out $(TARGETS) $(OBJECTS) $(PCHS) $(DSYM) *~

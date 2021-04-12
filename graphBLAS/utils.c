@@ -1,4 +1,7 @@
-void create_ok(GrB_Info p) {
+#include "GraphBLAS.h"
+#include "LAGraph.h"
+
+void CUST_OK(GrB_Info p) {
   if(p != GrB_SUCCESS) {
     printf("error %d\n", p);
     exit(p);

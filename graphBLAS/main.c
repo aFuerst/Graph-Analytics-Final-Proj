@@ -7,6 +7,18 @@
 #include "LAGraph.h"
 
 /*
+* Assumptions:
+*   All nodes are labeled 0-|V-1|
+*   
+*/
+
+// 'includes'
+GrB_Info LAGraph_init();
+GrB_Info LAGraph_finalize();
+void CUST_OK(GrB_Info p);
+GrB_Info AllPairsShortestPath(GrB_Matrix matrix, GrB_Matrix* apsp);
+
+/*
 * Given a boolean n x n adjacency matrix A and a source vertex s,performs a BFS traversal
 * of the graph and sets v[i] to the level in which vertex i is visited (v[s]==1).
 * If i is not reacheable from s, then v[i]=0.(Vector v should be empty on input.)
@@ -41,6 +53,13 @@ void InitGraph(GrB_Matrix *matrix) {
   int expected_nodes = 5881;
   GrB_Index const NUM_NODES = 5881;
   GrB_Info g = GrB_Matrix_new(matrix, GrB_BOOL, NUM_NODES, NUM_NODES);
+
+  for (GrB_Index i=0; i < NUM_NODES; ++i) {
+    for (GrB_Index j=0; j < NUM_NODES; ++j) {
+      GrB_Matrix_setElement(*matrix, (bool)false, i, j);
+    }
+  }
+
   if(g != GrB_SUCCESS) {
     printf("new error %d\n", g);
     exit(g);
@@ -91,11 +110,32 @@ void InitGraph(GrB_Matrix *matrix) {
       exit(set);
     }
   }
-  printf("edges: %d; bad edges: %d", edges, bad_edges);
+  printf("edges: %d; bad edges: %d\n", edges, bad_edges);
+
+  double x=0;
+  bool d = false;
+  for (GrB_Index i=0; i < NUM_NODES; ++i) {
+    GrB_Matrix_extractElement(&d, *matrix, i, 1000);
+    x += d;
+  }
+  printf("orig degree: %f\n", x);
+
+}
+
+void clustering() {
+  GrB_Info LAGraph_lcc            // compute lcc for all nodes in A
+(
+    GrB_Vector *LCC_handle,     // output vector
+    const GrB_Matrix A,         // input matrix
+    bool symmetric,             // if true, the matrix is symmetric
+    bool sanitize,              // if true, ensure A is binary
+    double t [2]                // t [0] = sanitize time, t [1] = lcc time,
+                                // in seconds
+)
 }
 
 int main(int argc, char** argv) {
-  GrB_Mode mode = GrB_BLOCKING;
+  // GrB_Mode mode = GrB_BLOCKING;
   // GrB_Info init = GrB_init(mode);
   GrB_Info init = LAGraph_init();
   if(init != GrB_SUCCESS) {
@@ -108,28 +148,61 @@ int main(int argc, char** argv) {
 
   GrB_Index const NUM_NODES = 5881;
   GrB_Vector v;
-  GrB_Info t = GrB_Vector_new(&v, GrB_UINT32, NUM_NODES);
+  CUST_OK(GrB_Vector_new(&v, GrB_UINT32, NUM_NODES));
 
-  GrB_Info call = LAGraph_cc_fastsv5b(
-    &v,     // output: array of component identifiers
-    &matrix,          // input matrix
-    false
-  );
+  // compute connected components
+  // GrB_Info call = LAGraph_cc_fastsv5b(
+  //   &v,     // output: array of component identifiers
+  //   &matrix,          // input matrix
+  //   false
+  // );
 
-  if(call != GrB_SUCCESS) {
-    printf("cc call error %d\n", call);
-    exit(call);
-  }
-  int d;
+  // if(call != GrB_SUCCESS) {
+  //   printf("cc call error %d\n", call);
+  //   exit(call);
+  // }
+  // int d;
+  // for (GrB_Index i=0; i < NUM_NODES; ++i) {
+  //   // output is pointers to parents (I think)
+  //   GrB_Vector_extractElement(&d, v, i);
+  //   printf("%d,", d);
+  // }
+
+  // GrB_Matrix apsp;
+  // AllPairsShortestPath(matrix, &apsp);
+
+  CUST_OK(Degree(matrix, v));
+
+  double x=0;
+  bool d = false;
   for (GrB_Index i=0; i < NUM_NODES; ++i) {
-    // output is pointers to parents (I think)
-    GrB_Vector_extractElement(&d, v, i);
-    printf("%d,", d);
+    GrB_Matrix_extractElement(&d, matrix, i, 1000);
+    if (!d) {
+      // printf("%d,%d\n", d, i);
+    }
+    x += d;
   }
+  printf("manual degree: %f\n", x);
 
-  printf("%d\n", init);
+  int q;
+  GrB_Vector_extractElement(&q, v, 1000);
+  printf("gblas degree: %d\n", q);
+
+
+  uint64_t tricount = trianglecount(matrix, &v);
+  long y = 0;
+  long z = 0;
+  for (GrB_Index i=0; i < NUM_NODES; ++i) {
+    GrB_Vector_extractElement(&z, v, i);
+    y += z;
+  }
+  printf("%ld vs %ld\n", y, tricount);
+
+
   // GrB_Info finalize = GrB_finalize();
   GrB_Info finalize = LAGraph_finalize();
   printf("%d\n", finalize);
+
+  printf("%d\n", true);
   return 0;
 }
