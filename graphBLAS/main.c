@@ -122,16 +122,9 @@ void InitGraph(GrB_Matrix *matrix) {
 
 }
 
-void clustering() {
-  GrB_Info LAGraph_lcc            // compute lcc for all nodes in A
-(
-    GrB_Vector *LCC_handle,     // output vector
-    const GrB_Matrix A,         // input matrix
-    bool symmetric,             // if true, the matrix is symmetric
-    bool sanitize,              // if true, ensure A is binary
-    double t [2]                // t [0] = sanitize time, t [1] = lcc time,
-                                // in seconds
-)
+GrB_Info clustering(const GrB_Matrix matrix, GrB_Vector *LCC_handle) {
+  double time[2];
+  return LAGraph_lcc(LCC_handle, matrix, false, false, time);
 }
 
 int main(int argc, char** argv) {
@@ -168,8 +161,8 @@ int main(int argc, char** argv) {
   //   printf("%d,", d);
   // }
 
-  // GrB_Matrix apsp;
-  // AllPairsShortestPath(matrix, &apsp);
+  GrB_Matrix apsp;
+  AllPairsShortestPath(matrix, &apsp);
 
   CUST_OK(Degree(matrix, v));
 
