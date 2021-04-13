@@ -130,6 +130,9 @@ GrB_Info clustering(const GrB_Matrix matrix, GrB_Vector *LCC_handle) {
 int main(int argc, char** argv) {
   // GrB_Mode mode = GrB_BLOCKING;
   // GrB_Info init = GrB_init(mode);
+
+
+
   GrB_Info init = LAGraph_init();
   if(init != GrB_SUCCESS) {
     printf("init error %d\n", init);
@@ -137,6 +140,10 @@ int main(int argc, char** argv) {
   }
 
   GrB_Matrix matrix;
+
+  CUST_OK(LoadAmazon(&matrix));
+  return 0;
+
   InitGraph(&matrix);
 
   GrB_Index const NUM_NODES = 5881;
