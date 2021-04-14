@@ -5,9 +5,14 @@
 #include "GraphBLAS.h"
 #include "LAGraph.h"
 
+double LAGraph_toc(const double tic [2]);
+void LAGraph_tic(const double tic [2]);
 void CUST_OK(GrB_Info p);
 
-GrB_Info AllPairsShortestPath(GrB_Matrix matrix, GrB_Matrix* apsp) {
+GrB_Info AllPairsShortestPath(GrB_Matrix matrix, GrB_Matrix* apsp, double* time) {
+  double tictok[2]; 
+  LAGraph_tic(tictok);
+
   GrB_Index nrows;
   CUST_OK(GrB_Matrix_nrows(&nrows, matrix)); // n = # of rows of A
   GrB_Vector compute_output;
@@ -23,8 +28,8 @@ GrB_Info AllPairsShortestPath(GrB_Matrix matrix, GrB_Matrix* apsp) {
 
 
   for (GrB_Index i=0; i < nrows; ++i) {
-    CUST_OK(LAGraph_BF_basic(&compute_output, matrix, i));
-    CUST_OK(GrB_assign(result, GrB_NULL, GrB_NULL, compute_output, i, GrB_ALL, 1, GrB_NULL));
+    MSG_OK(LAGraph_BF_basic(&compute_output, matrix, i), "apsp BF basic");
+    MSG_OK(GrB_assign(result, GrB_NULL, GrB_NULL, compute_output, i, GrB_ALL, 1, GrB_NULL), "apsp assign");
 
     // for (GrB_Index j=0; j < nrows; ++j) { 
     //   double temp;
@@ -33,5 +38,7 @@ GrB_Info AllPairsShortestPath(GrB_Matrix matrix, GrB_Matrix* apsp) {
     // }
   }
   *apsp = result;
+  *time = LAGraph_toc(tictok);
+  MSG_OK(GrB_free(&compute_output), "freeing compute_output");
   return GrB_SUCCESS;
 }

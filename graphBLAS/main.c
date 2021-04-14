@@ -15,9 +15,20 @@
 // 'includes'
 GrB_Info LAGraph_init();
 GrB_Info LAGraph_finalize();
+double LAGraph_toc(const double tic [2]);
+void LAGraph_tic(const double tic [2]);
 void CUST_OK(GrB_Info p);
-GrB_Info AllPairsShortestPath(GrB_Matrix matrix, GrB_Matrix* apsp);
+GrB_Info AllPairsShortestPath(GrB_Matrix matrix, GrB_Matrix* apsp, double* time);
 
+const char *graph_names[] = {"bitcoin", "amazon", "hepth", "gnutella", "twitter", "wikivote"};
+GrB_Info LoadAmazon(GrB_Matrix *matrix);
+GrB_Info LoadHepTh(GrB_Matrix *matrix);
+GrB_Info LoadGnutella(GrB_Matrix *matrix);
+GrB_Info LoadTwitter(GrB_Matrix *matrix);
+GrB_Info LoadWikiVote(GrB_Matrix *matrix);
+GrB_Info LoadBitcoinOTC(GrB_Matrix *matrix);
+GrB_Info (*load_funcs[])(GrB_Matrix *matrix) = {LoadBitcoinOTC, LoadAmazon, LoadHepTh, LoadGnutella, LoadTwitter, LoadWikiVote};
+const int NUM_GRAPHS = 6;
 /*
 * Given a boolean n x n adjacency matrix A and a source vertex s,performs a BFS traversal
 * of the graph and sets v[i] to the level in which vertex i is visited (v[s]==1).
@@ -122,18 +133,94 @@ void InitGraph(GrB_Matrix *matrix) {
 
 }
 
-GrB_Info clustering(const GrB_Matrix matrix, GrB_Vector *LCC_handle) {
-  double time[2];
-  return LAGraph_lcc(LCC_handle, matrix, false, false, time);
+GrB_Info Clustering(const GrB_Matrix matrix, GrB_Vector *output, double *time) {
+  double t[2];
+  GrB_Info ret = LAGraph_lcc(output, matrix, false, false, t);
+  *time = t[1];
+  return ret;
+}
+
+GrB_Info ConnectedComponents(const GrB_Matrix matrix, GrB_Vector *output, double *time) {
+  double tictok[2]; 
+  LAGraph_tic(tictok);
+
+  // compute connected components
+  MSG_OK(LAGraph_cc_fastsv5b(output, &matrix, false), "LAGraph_cc_fastsv5b");
+
+  // int d;
+  // for (GrB_Index i=0; i < NUM_NODES; ++i) {
+  //   // output is pointers to parents (I think)
+  //   GrB_Vector_extractElement(&d, v, i);
+  //   printf("%d,", d);
+  // }
+  *time = LAGraph_toc(tictok);
+  return GrB_SUCCESS;
+}
+
+/*
+* Runs on preloaded matrix
+*/
+void RunTimes(GrB_Matrix matrix) {
+  GrB_Index nrows;
+  CUST_OK(GrB_Matrix_nrows(&nrows, matrix));
+  GrB_Vector vec_output;
+  CUST_OK(GrB_Vector_new(&vec_output, GrB_UINT32, nrows));
+
+  GrB_Matrix mat_output;
+  CUST_OK(GrB_Matrix_new(&mat_output, GrB_UINT32, nrows, nrows));
+
+  // time all pairs shortest path
+  GrB_Matrix apsp;
+  double time=0;
+
+  // time computing node degree
+  time = 0;
+  CUST_OK(Degree(matrix, vec_output, &time));
+  printf("Degree time: %f\n", time);
+
+  // double x=0;
+  // bool d = false;
+  // for (GrB_Index i=0; i < NUM_NODES; ++i) {
+  //   GrB_Matrix_extractElement(&d, matrix, i, 1000);
+  //   if (!d) {
+  //     // printf("%d,%d\n", d, i);
+  //   }
+  //   x += d;
+  // }
+  // printf("manual degree: %f\n", x);
+
+  // int q;
+  // GrB_Vector_extractElement(&q, v, 1000);
+  // printf("gblas degree: %d\n", q);
+
+  // time CC
+  time = 0;
+  CUST_OK(ConnectedComponents(matrix, &vec_output, &time));
+  printf("CC time: %f\n", time);
+
+  // time local clustering
+  time = 0;
+  MSG_OK(Clustering(matrix, &vec_output, &time), "clustering");
+  printf("Clustering time: %f\n", time);
+
+  time = 0;
+  AllPairsShortestPath(matrix, &apsp, &time);
+  printf("APSP time: %f\n", time);
+
+  CUST_OK(GrB_free(&vec_output));
+  CUST_OK(GrB_free(&mat_output));
+  CUST_OK(GrB_free(&apsp));
 }
 
 int main(int argc, char** argv) {
-  // GrB_Mode mode = GrB_BLOCKING;
-  // GrB_Info init = GrB_init(mode);
-
-
-
   GrB_Info init = LAGraph_init();
+  int SET_THREADS = 46;
+  int threads = LAGraph_set_nthreads(SET_THREADS); // 2 less than on machine
+  if (threads != SET_THREADS) {
+    printf("Thread count not set! %d vs %d\n", threads, SET_THREADS);
+    exit(1);
+  }
+  printf("Running with %d threads\n", threads);
   if(init != GrB_SUCCESS) {
     printf("init error %d\n", init);
     exit(init);
@@ -141,62 +228,27 @@ int main(int argc, char** argv) {
 
   GrB_Matrix matrix;
 
-  CUST_OK(LoadAmazon(&matrix));
-  return 0;
+  for (int i=0; i < NUM_GRAPHS; ++i) {
+    printf("Running %s\n", graph_names[i]);
+    CUST_OK(load_funcs[i](&matrix));
+    RunTimes(matrix);
+    CUST_OK(GrB_free(&matrix));
+  }
 
-  InitGraph(&matrix);
+  // return 0;
 
-  GrB_Index const NUM_NODES = 5881;
-  GrB_Vector v;
-  CUST_OK(GrB_Vector_new(&v, GrB_UINT32, NUM_NODES));
+  // InitGraph(&matrix);
 
-  // compute connected components
-  // GrB_Info call = LAGraph_cc_fastsv5b(
-  //   &v,     // output: array of component identifiers
-  //   &matrix,          // input matrix
-  //   false
-  // );
 
-  // if(call != GrB_SUCCESS) {
-  //   printf("cc call error %d\n", call);
-  //   exit(call);
-  // }
-  // int d;
+
+  // uint64_t tricount = trianglecount(matrix, &v);
+  // long y = 0;
+  // long z = 0;
   // for (GrB_Index i=0; i < NUM_NODES; ++i) {
-  //   // output is pointers to parents (I think)
-  //   GrB_Vector_extractElement(&d, v, i);
-  //   printf("%d,", d);
+  //   GrB_Vector_extractElement(&z, v, i);
+  //   y += z;
   // }
-
-  GrB_Matrix apsp;
-  AllPairsShortestPath(matrix, &apsp);
-
-  CUST_OK(Degree(matrix, v));
-
-  double x=0;
-  bool d = false;
-  for (GrB_Index i=0; i < NUM_NODES; ++i) {
-    GrB_Matrix_extractElement(&d, matrix, i, 1000);
-    if (!d) {
-      // printf("%d,%d\n", d, i);
-    }
-    x += d;
-  }
-  printf("manual degree: %f\n", x);
-
-  int q;
-  GrB_Vector_extractElement(&q, v, 1000);
-  printf("gblas degree: %d\n", q);
-
-
-  uint64_t tricount = trianglecount(matrix, &v);
-  long y = 0;
-  long z = 0;
-  for (GrB_Index i=0; i < NUM_NODES; ++i) {
-    GrB_Vector_extractElement(&z, v, i);
-    y += z;
-  }
-  printf("%ld vs %ld\n", y, tricount);
+  // printf("%ld vs %ld\n", y, tricount);
 
 
   // GrB_Info finalize = GrB_finalize();

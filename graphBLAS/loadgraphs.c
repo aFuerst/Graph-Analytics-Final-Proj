@@ -130,7 +130,7 @@ GrB_Info LoadBitcoinOTC(GrB_Matrix *matrix) {
     printf("new error %d\n", g);
     exit(g);
   }
-  char* fname = "../graphs/social/soc-sign-bitcoinotc-patch.csv";
+  char* fname = "../graphs/soc-sign-bitcoinotc-patch.csv";
   FILE* fp = fopen(fname,"r");
   if (fp == NULL) {
       printf("failed to open file");

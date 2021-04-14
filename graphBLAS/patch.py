@@ -180,6 +180,8 @@ def patch_wiki_vote():
   sp = nx.to_scipy_sparse_matrix(G)
   io.mmwrite("../graphs/wiki-Vote-patched.mtx", sp)
 
+patch_bitcoin()
+patch_amazon()
 patch_hepth()
 patch_gnutella()
 patch_twitter()
