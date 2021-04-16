@@ -20,14 +20,14 @@ void LAGraph_tic(const double tic [2]);
 void CUST_OK(GrB_Info p);
 GrB_Info AllPairsShortestPath(GrB_Matrix matrix, GrB_Matrix* apsp, double* time);
 
-const char *graph_names[] = {"bitcoin", "amazon", "hepth", "gnutella", "twitter", "wikivote"};
+const char *graph_names[] = {"bitcoin", "gnutella", "twitter", "wikivote", "hepth", "amazon"};
 GrB_Info LoadAmazon(GrB_Matrix *matrix);
 GrB_Info LoadHepTh(GrB_Matrix *matrix);
 GrB_Info LoadGnutella(GrB_Matrix *matrix);
 GrB_Info LoadTwitter(GrB_Matrix *matrix);
 GrB_Info LoadWikiVote(GrB_Matrix *matrix);
 GrB_Info LoadBitcoinOTC(GrB_Matrix *matrix);
-GrB_Info (*load_funcs[])(GrB_Matrix *matrix) = {LoadBitcoinOTC, LoadAmazon, LoadHepTh, LoadGnutella, LoadTwitter, LoadWikiVote};
+GrB_Info (*load_funcs[])(GrB_Matrix *matrix) = {LoadBitcoinOTC, LoadGnutella, LoadTwitter, LoadWikiVote, LoadAmazon, LoadHepTh};
 const int NUM_GRAPHS = 6;
 /*
 * Given a boolean n x n adjacency matrix A and a source vertex s,performs a BFS traversal
@@ -160,7 +160,7 @@ GrB_Info ConnectedComponents(const GrB_Matrix matrix, GrB_Vector *output, double
 /*
 * Runs on preloaded matrix
 */
-void RunTimes(GrB_Matrix matrix) {
+void RunTimes(GrB_Matrix matrix, const char *fname, GrB_Info (*load_func)(GrB_Matrix *matrix)) {
   GrB_Index nrows;
   CUST_OK(GrB_Matrix_nrows(&nrows, matrix));
   GrB_Vector vec_output;
@@ -197,9 +197,13 @@ void RunTimes(GrB_Matrix matrix) {
   time = 0;
   CUST_OK(ConnectedComponents(matrix, &vec_output, &time));
   printf("CC time: %f\n", time);
-
+  CUST_OK(GrB_free(&vec_output));
+  CUST_OK(GrB_free(&matrix));
+  
   // time local clustering
   time = 0;
+  CUST_OK(GrB_Vector_new(&vec_output, GrB_FP64, nrows));
+  CUST_OK(load_func(&matrix));
   MSG_OK(Clustering(matrix, &vec_output, &time), "clustering");
   printf("Clustering time: %f\n", time);
 
@@ -231,7 +235,7 @@ int main(int argc, char** argv) {
   for (int i=0; i < NUM_GRAPHS; ++i) {
     printf("Running %s\n", graph_names[i]);
     CUST_OK(load_funcs[i](&matrix));
-    RunTimes(matrix);
+    RunTimes(matrix, graph_names[i], load_funcs[i]);
     CUST_OK(GrB_free(&matrix));
   }
 

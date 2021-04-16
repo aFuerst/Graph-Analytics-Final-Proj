@@ -8,6 +8,7 @@
 double LAGraph_toc(const double tic [2]);
 void LAGraph_tic(const double tic [2]);
 void CUST_OK(GrB_Info p);
+GrB_Info GrB_Row_assign(GrB_Matrix C, const GrB_Vector mask, const GrB_BinaryOp accum, const GrB_Vector u, GrB_Index r_idx, const GrB_Index* col_idcs, GrB_Index ncols, const GrB_Descriptor desc);
 
 GrB_Info AllPairsShortestPath(GrB_Matrix matrix, GrB_Matrix* apsp, double* time) {
   double tictok[2]; 
@@ -27,9 +28,15 @@ GrB_Info AllPairsShortestPath(GrB_Matrix matrix, GrB_Matrix* apsp, double* time)
   // GrB_Index columns[1] = { GrB_ALL };
 
 
+  char msg[1000];
+  // GrB_Index idx[1];
   for (GrB_Index i=0; i < nrows; ++i) {
     MSG_OK(LAGraph_BF_basic(&compute_output, matrix, i), "apsp BF basic");
-    MSG_OK(GrB_assign(result, GrB_NULL, GrB_NULL, compute_output, i, GrB_ALL, 1, GrB_NULL), "apsp assign");
+    sprintf(msg, "apsp assign, iter:%lu, len %lu\n", i, nrows);
+    // printf("curr iter %lu\n", i);
+    // idx[0] = i;
+    GrB_Info r = GrB_Row_assign(result, GrB_NULL, GrB_NULL, compute_output, i, GrB_ALL, (GrB_Index)1, GrB_NULL);
+    MSG_OK(r, msg);
 
     // for (GrB_Index j=0; j < nrows; ++j) { 
     //   double temp;
