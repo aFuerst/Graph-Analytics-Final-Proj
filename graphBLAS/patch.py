@@ -40,12 +40,12 @@ def patch_bitcoin():
 
         patch.write("{},{},{},{}".format(src,dest,a,b))
 
-def patch_amazon():
-  print("patching and converting amazon0302.txt")
+def patch_enron():
+  print("patching and converting email-Enron.txt")
   mapped = {}
   i = 0
   G = nx.DiGraph()
-  with open("../graphs/amazon0302.txt") as f:
+  with open("../graphs/email-Enron.txt") as f:
     for line in f.readlines():
       if line[0] == '#':
         continue
@@ -66,7 +66,7 @@ def patch_amazon():
 
       G.add_edge(src, dest)
   sp = nx.to_scipy_sparse_matrix(G)
-  io.mmwrite("../graphs/amazon0302-patched.mtx", sp)
+  io.mmwrite("../graphs/email-Enron-patched.mtx", sp)
 
 def patch_hepth():
   print("patching and converting cit-HepTh.txt")
@@ -124,12 +124,12 @@ def patch_gnutella():
   sp = nx.to_scipy_sparse_matrix(G)
   io.mmwrite("../graphs/p2p-Gnutella31-patched.mtx", sp)
 
-def patch_twitter():
-  print("patching and converting twitter_combined.txt")
+def patch_hepph():
+  print("patching and converting ca-HepPh.txt")
   mapped = {}
   i = 0
   G = nx.DiGraph()
-  with open("../graphs/twitter_combined.txt") as f:
+  with open("../graphs/ca-HepPh.txt") as f:
     for line in f.readlines():
       if line[0] == '#':
         continue
@@ -150,7 +150,7 @@ def patch_twitter():
 
       G.add_edge(src, dest)
   sp = nx.to_scipy_sparse_matrix(G)
-  io.mmwrite("../graphs/twitter_combined-patched.mtx", sp)
+  io.mmwrite("../graphs/ca-HepPh-patched.mtx", sp)
 
 def patch_wiki_vote():
   print("patching and converting wiki-Vote.txt")
@@ -181,8 +181,8 @@ def patch_wiki_vote():
   io.mmwrite("../graphs/wiki-Vote-patched.mtx", sp)
 
 patch_bitcoin()
-patch_amazon()
+patch_enron()
 patch_hepth()
 patch_gnutella()
-patch_twitter()
+patch_hepph()
 patch_wiki_vote()

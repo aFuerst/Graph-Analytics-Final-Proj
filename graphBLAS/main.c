@@ -20,14 +20,14 @@ void LAGraph_tic(const double tic [2]);
 void CUST_OK(GrB_Info p);
 GrB_Info AllPairsShortestPath(GrB_Matrix matrix, GrB_Matrix* apsp, double* time);
 
-const char *graph_names[] = {"bitcoin", "gnutella", "twitter", "wikivote", "hepth", "amazon"};
-GrB_Info LoadAmazon(GrB_Matrix *matrix);
+const char *graph_names[] = {"gnutella", "wikivote", "hepth", "bitcoin", "enron", "hepph"};
 GrB_Info LoadHepTh(GrB_Matrix *matrix);
-GrB_Info LoadGnutella(GrB_Matrix *matrix);
 GrB_Info LoadTwitter(GrB_Matrix *matrix);
 GrB_Info LoadWikiVote(GrB_Matrix *matrix);
 GrB_Info LoadBitcoinOTC(GrB_Matrix *matrix);
-GrB_Info (*load_funcs[])(GrB_Matrix *matrix) = {LoadBitcoinOTC, LoadGnutella, LoadTwitter, LoadWikiVote, LoadAmazon, LoadHepTh};
+GrB_Info LoadEnron(GrB_Matrix *matrix);
+GrB_Info LoadHepPh(GrB_Matrix *matrix);
+GrB_Info (*load_funcs[])(GrB_Matrix *matrix) = {LoadTwitter, LoadWikiVote, LoadHepTh, LoadBitcoinOTC, LoadEnron, LoadHepPh};
 const int NUM_GRAPHS = 6;
 /*
 * Given a boolean n x n adjacency matrix A and a source vertex s,performs a BFS traversal

@@ -188,3 +188,33 @@ GrB_Info LoadBitcoinOTC(GrB_Matrix *matrix) {
 
   return GrB_SUCCESS;
 }
+
+GrB_Info LoadEnron(GrB_Matrix *matrix) {
+  char *fname = "../graphs/email-Enron-patched.mtx";
+  printf("Reading Matrix Market file: %s\n", fname);
+  FILE *f = fopen(fname, "r");
+  if (f == NULL)
+  {
+    printf("Matrix file not found: [%s]\n", fname);
+    exit(1);
+  }
+  CUST_OK(LAGraph_mmread(matrix, f));
+  fclose(f);
+
+  return GrB_SUCCESS;
+}
+
+GrB_Info LoadHepPh(GrB_Matrix *matrix) {
+  char *fname = "../graphs/ca-HepPh-patched.mtx";
+  printf("Reading Matrix Market file: %s\n", fname);
+  FILE *f = fopen(fname, "r");
+  if (f == NULL)
+  {
+    printf("Matrix file not found: [%s]\n", fname);
+    exit(1);
+  }
+  CUST_OK(LAGraph_mmread(matrix, f));
+  fclose(f);
+
+  return GrB_SUCCESS;
+}
