@@ -36,7 +36,7 @@ GrB_Info AllPairsShortestPath(GrB_Matrix matrix, GrB_Matrix* apsp, double* time)
 
 
   char msg[1000];
-  int deg = 0;
+  uint32_t deg = 0;
   // GrB_Index idx[1];
   for (GrB_Index i=0; i < nrows; ++i) {
     MSG_OK(GrB_Vector_extractElement(&deg, degrees, i), "apsp degree check");
@@ -51,18 +51,18 @@ GrB_Info AllPairsShortestPath(GrB_Matrix matrix, GrB_Matrix* apsp, double* time)
       // idx[0] = i;
       GrB_Info r = GrB_Row_assign(result, GrB_NULL, GrB_NULL, compute_output, i, GrB_ALL, (GrB_Index)1, GrB_NULL);
 
-      // if (r == GrB_NULL_POINTER) {
-      //   printf("null ptr on idx '%lu'\n", i);
-      //   double temp;
-      //   for (GrB_Index j = 0; j < nrows; ++j) {
-      //     GrB_Vector_extractElement(&temp, compute_output, j);
-      //     printf("val at %lu: %f\n", j, temp);
-      //     // CUST_OK(GrB_Matrix_setElement(result, temp, i, j));
-      //   }
+      if (r == GrB_NULL_POINTER) {
+        printf("null ptr on idx '%lu'\n", i);
+        double temp;
+        for (GrB_Index j = 0; j < nrows; ++j) {
+          GrB_Vector_extractElement(&temp, compute_output, j);
+          printf("val at %lu: %f\n", j, temp);
+          // CUST_OK(GrB_Matrix_setElement(result, temp, i, j));
+        }
 
-      //   GrB_Vector_extractElement(&temp, compute_output, i);
-      //   printf("degree of idx %lu: %f\n", i, temp);
-      // }
+        // GrB_Vector_extractElement(&temp, compute_output, i);
+        printf("degree of idx %lu: %u\n", i, deg);
+      }
       MSG_OK(r, msg);
     }
   }
