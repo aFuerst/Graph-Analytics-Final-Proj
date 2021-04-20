@@ -44,7 +44,7 @@ def patch_enron():
   print("patching and converting email-Enron.txt")
   mapped = {}
   i = 0
-  G = nx.DiGraph()
+  G = nx.Graph()
   with open("../graphs/email-Enron.txt") as f:
     for line in f.readlines():
       if line[0] == '#':
@@ -72,7 +72,7 @@ def patch_hepth():
   print("patching and converting cit-HepTh.txt")
   mapped = {}
   i = 0
-  G = nx.DiGraph()
+  G = nx.Graph()
   with open("../graphs/cit-HepTh.txt") as f:
     for line in f.readlines():
       if line[0] == '#':

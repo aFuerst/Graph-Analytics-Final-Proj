@@ -176,7 +176,7 @@ GrB_Info LoadBitcoinOTC(GrB_Matrix *matrix) {
       exit(set);
     }
   }
-  printf("edges: %d; bad edges: %d\n", edges, bad_edges);
+  // printf("edges: %d; bad edges: %d\n", edges, bad_edges);
 
   double x=0;
   bool d = false;
@@ -184,7 +184,7 @@ GrB_Info LoadBitcoinOTC(GrB_Matrix *matrix) {
     GrB_Matrix_extractElement(&d, *matrix, i, 1000);
     x += d;
   }
-  printf("orig degree: %f\n", x);
+  // printf("orig degree: %f\n", x);
 
   return GrB_SUCCESS;
 }

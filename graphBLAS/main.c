@@ -160,7 +160,10 @@ GrB_Info ConnectedComponents(const GrB_Matrix matrix, GrB_Vector *output, double
 /*
 * Runs on preloaded matrix
 */
-void RunTimes(GrB_Matrix matrix, const char *fname, GrB_Info (*load_func)(GrB_Matrix *matrix)) {
+void RunTimes(const char *graph_name, GrB_Info (*load_func)(GrB_Matrix *matrix)) {
+  GrB_Matrix matrix;
+  CUST_OK(load_func(&matrix));
+
   GrB_Index nrows;
   CUST_OK(GrB_Matrix_nrows(&nrows, matrix));
   GrB_Vector vec_output;
@@ -169,14 +172,13 @@ void RunTimes(GrB_Matrix matrix, const char *fname, GrB_Info (*load_func)(GrB_Ma
   GrB_Matrix mat_output;
   CUST_OK(GrB_Matrix_new(&mat_output, GrB_UINT32, nrows, nrows));
 
-  // time all pairs shortest path
-  GrB_Matrix apsp;
   double time=0;
 
   // time computing node degree
   time = 0;
   CUST_OK(Degree(matrix, vec_output, &time));
   printf("Degree time: %f\n", time);
+  CUST_OK(SaveData(vec_output, "Degrees", graph_name));
 
   // double x=0;
   // bool d = false;
@@ -197,27 +199,32 @@ void RunTimes(GrB_Matrix matrix, const char *fname, GrB_Info (*load_func)(GrB_Ma
   time = 0;
   CUST_OK(ConnectedComponents(matrix, &vec_output, &time));
   printf("CC time: %f\n", time);
+  CUST_OK(SaveData(vec_output, "ConnectedComponents", graph_name));
   CUST_OK(GrB_free(&vec_output));
   CUST_OK(GrB_free(&matrix));
   
   // time local clustering
   time = 0;
-  CUST_OK(GrB_Vector_new(&vec_output, GrB_FP64, nrows));
   CUST_OK(load_func(&matrix));
+  CUST_OK(GrB_Vector_new(&vec_output, GrB_FP64, nrows));
   MSG_OK(Clustering(matrix, &vec_output, &time), "clustering");
   printf("Clustering time: %f\n", time);
+  CUST_OK(SaveData(vec_output, "ClusteringCoeff", graph_name));
 
-  time = 0;
-  AllPairsShortestPath(matrix, &apsp, &time);
-  printf("APSP time: %f\n", time);
+  // time all pairs shortest path
+  // GrB_Matrix apsp;
+  // time = 0;
+  // AllPairsShortestPath(matrix, &apsp, &time);
+  // printf("APSP time: %f\n", time);
 
   CUST_OK(GrB_free(&vec_output));
   CUST_OK(GrB_free(&mat_output));
-  CUST_OK(GrB_free(&apsp));
+  // CUST_OK(GrB_free(&apsp));
+  CUST_OK(GrB_free(&matrix));
 }
 
 int main(int argc, char** argv) {
-  GrB_Info init = LAGraph_init();
+  MSG_OK(LAGraph_init(), "LAGraph_init");
   int SET_THREADS = 46;
   int threads = LAGraph_set_nthreads(SET_THREADS); // 2 less than on machine
   if (threads != SET_THREADS) {
@@ -225,40 +232,13 @@ int main(int argc, char** argv) {
     exit(1);
   }
   printf("Running with %d threads\n", threads);
-  if(init != GrB_SUCCESS) {
-    printf("init error %d\n", init);
-    exit(init);
-  }
-
-  GrB_Matrix matrix;
 
   for (int i=0; i < NUM_GRAPHS; ++i) {
     printf("Running %s\n", graph_names[i]);
-    CUST_OK(load_funcs[i](&matrix));
-    RunTimes(matrix, graph_names[i], load_funcs[i]);
-    CUST_OK(GrB_free(&matrix));
+    RunTimes(graph_names[i], load_funcs[i]);
   }
 
-  // return 0;
-
-  // InitGraph(&matrix);
-
-
-
-  // uint64_t tricount = trianglecount(matrix, &v);
-  // long y = 0;
-  // long z = 0;
-  // for (GrB_Index i=0; i < NUM_NODES; ++i) {
-  //   GrB_Vector_extractElement(&z, v, i);
-  //   y += z;
-  // }
-  // printf("%ld vs %ld\n", y, tricount);
-
-
-  // GrB_Info finalize = GrB_finalize();
-  GrB_Info finalize = LAGraph_finalize();
-  printf("%d\n", finalize);
-
-  printf("%d\n", true);
+  MSG_OK(LAGraph_finalize(), "LAGRAPH_finalize");
+  // printf("%d\n", finalize);
   return 0;
 }
