@@ -29,3 +29,25 @@ GrB_Info SaveData(GrB_Vector data, char *class, char *dataset)
   fclose(fp);
   return GrB_SUCCESS;
 }
+
+GrB_Info SaveAPSPData(int total_samples, double total_time, double *timedata, const char *dataset)
+{
+  char fname[200];
+  sprintf(fname, "./savedata/shortestpath-times-%s.csv", dataset);
+  FILE *fp = fopen(fname, "w");
+  if (fp == NULL)
+  {
+    printf("failed to open file");
+    exit(1);
+  }
+  fprintf(fp, "node,value\n");
+
+  // double val;
+  fprintf(fp, "%d,%f\n", -1, total_time);
+  for (int i = 0; i < total_samples; ++i)
+  {
+    fprintf(fp, "%d,%f\n", i, timedata[i]);
+  }
+  fclose(fp);
+  return GrB_SUCCESS;
+}

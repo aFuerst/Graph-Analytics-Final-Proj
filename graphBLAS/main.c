@@ -18,7 +18,8 @@ GrB_Info LAGraph_finalize();
 double LAGraph_toc(const double tic [2]);
 void LAGraph_tic(const double tic [2]);
 void CUST_OK(GrB_Info p);
-GrB_Info AllPairsShortestPath(GrB_Matrix matrix, GrB_Matrix* apsp, double* time);
+GrB_Info AllPairsShortestPath(GrB_Matrix matrix, GrB_Matrix *apsp, double *time, int total_samples, double *sample_times);
+GrB_Info SaveAPSPData(int total_samples, double total_time, double *timedata, const char *dataset);
 
 const char *graph_names[] = {"gnutella", "wikivote", "hepth", "bitcoin", "enron", "hepph"};
 GrB_Info LoadHepTh(GrB_Matrix *matrix);
@@ -212,10 +213,14 @@ void RunTimes(const char *graph_name, GrB_Info (*load_func)(GrB_Matrix *matrix))
   CUST_OK(SaveData(vec_output, "ClusteringCoeff", graph_name));
 
   // time all pairs shortest path
-  // GrB_Matrix apsp;
-  // time = 0;
-  // AllPairsShortestPath(matrix, &apsp, &time);
-  // printf("APSP time: %f\n", time);
+  GrB_Matrix apsp;
+  time = 0;
+  int tot_samples=100;
+  double *sample_times = malloc(sizeof(double)*tot_samples);
+  CUST_OK(AllPairsShortestPath(matrix, &apsp, &time, tot_samples, sample_times));
+  CUST_OK(SaveAPSPData(tot_samples, time, sample_times, graph_name));
+  free(sample_times);
+  printf("APSP time: %f\n", time);
 
   CUST_OK(GrB_free(&vec_output));
   CUST_OK(GrB_free(&mat_output));
