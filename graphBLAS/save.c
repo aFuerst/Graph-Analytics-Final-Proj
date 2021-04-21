@@ -33,7 +33,7 @@ GrB_Info SaveData(GrB_Vector data, char *class, char *dataset)
 GrB_Info SaveAPSPData(int total_samples, double total_time, double *timedata, const char *dataset)
 {
   char fname[200];
-  sprintf(fname, "./savedata/shortestpath-times-%s.csv", dataset);
+  sprintf(fname, "./savedata/shortestpath_times-%s.csv", dataset);
   FILE *fp = fopen(fname, "w");
   if (fp == NULL)
   {
