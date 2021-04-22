@@ -66,6 +66,37 @@ def patch_wiki_vote():
     np.savetxt("graph_data/02_wiki_indices.txt", G2.indices)
     np.savetxt("graph_data/02_wiki_offsets.txt", G2.indptr)
 
+def patch_wiki_vote_weakly():
+    print("Patching and Converting wiki-Vote.txt")
+    mapped = {}
+    i = 0
+    G = nx.Graph()
+    with open("../graphs/wiki-Vote.txt") as f:
+        for line in f.readlines():
+            if line[0] == '#':
+                continue
+            src, dest = line.split()
+            if src in mapped:
+                src = mapped[src]
+            else:      
+                mapped[src] = i
+                src = mapped[src]
+                i += 1
+
+            if dest in mapped:
+                dest = mapped[dest]
+            else:      
+                mapped[dest] = i
+                dest = mapped[dest]
+                i += 1
+
+            G.add_edge(src, dest)
+
+    G2 = nx.to_scipy_sparse_matrix(G, format='csc')
+    np.savetxt("graph_data/02_wiki_weakly_weights.txt", G2.data)
+    np.savetxt("graph_data/02_wiki_weakly_indices.txt", G2.indices)
+    np.savetxt("graph_data/02_wiki_weakly_offsets.txt", G2.indptr)
+
 def patch_bitcoin():
     print("Patching and Converting soc-sign-bitcoinotc.csv")
     mapped = {}
@@ -94,6 +125,35 @@ def patch_bitcoin():
     np.savetxt("graph_data/03_bitcoin_weights.txt", G2.data)
     np.savetxt("graph_data/03_bitcoin_indices.txt", G2.indices)
     np.savetxt("graph_data/03_bitcoin_offsets.txt", G2.indptr)
+
+def patch_bitcoin_weakly():
+    print("Patching and Converting soc-sign-bitcoinotc.csv")
+    mapped = {}
+    i = 0
+    G = nx.Graph()
+    with open("../graphs/soc-sign-bitcoinotc.csv") as f:
+        for line in f.readlines():
+            src, dest, a, b = line.split(",")
+            if src in mapped:
+                src = mapped[src]
+            else:      
+                mapped[src] = i
+                src = mapped[src]
+                i += 1
+
+            if dest in mapped:
+                dest = mapped[dest]
+            else:      
+                mapped[dest] = i
+                dest = mapped[dest]
+                i += 1
+
+            G.add_edge(src, dest)
+
+    G2 = nx.to_scipy_sparse_matrix(G, format='csc')
+    np.savetxt("graph_data/03_bitcoin_weakly_weights.txt", G2.data)
+    np.savetxt("graph_data/03_bitcoin_weakly_indices.txt", G2.indices)
+    np.savetxt("graph_data/03_bitcoin_weakly_offsets.txt", G2.indptr)
 
 def patch_hepth():
     print("Patching and Converting cit-HepTh.txt")
@@ -125,6 +185,37 @@ def patch_hepth():
     np.savetxt("graph_data/04_hepth_weights.txt", G2.data)
     np.savetxt("graph_data/04_hepth_indices.txt", G2.indices)
     np.savetxt("graph_data/04_hepth_offsets.txt", G2.indptr)
+
+def patch_hepth_weakly():
+    print("Patching and Converting cit-HepTh.txt")
+    mapped = {}
+    i = 0
+    G = nx.Graph()
+    with open("../graphs/cit-HepTh.txt") as f:
+        for line in f.readlines():
+            if line[0] == '#':
+                continue
+            src, dest = line.split()
+            if src in mapped:
+                src = mapped[src]
+            else:      
+                mapped[src] = i
+                src = mapped[src]
+                i += 1
+
+            if dest in mapped:
+                dest = mapped[dest]
+            else:      
+                mapped[dest] = i
+                dest = mapped[dest]
+                i += 1
+
+            G.add_edge(src, dest)
+    
+    G2 = nx.to_scipy_sparse_matrix(G, format='csc')
+    np.savetxt("graph_data/04_hepth_weakly_weights.txt", G2.data)
+    np.savetxt("graph_data/04_hepth_weakly_indices.txt", G2.indices)
+    np.savetxt("graph_data/04_hepth_weakly_offsets.txt", G2.indptr)
 
 def patch_ca_HepPh():
     print("Patching and Converting ca-HepPh.txt")
@@ -188,9 +279,45 @@ def patch_gnutella():
     np.savetxt("graph_data/06_gnutella_indices.txt", G2.indices)
     np.savetxt("graph_data/06_gnutella_offsets.txt", G2.indptr)
 
+def patch_gnutella_weakly():
+    print("Patching and Converting p2p-Gnutella31.txt")
+    mapped = {}
+    i = 0
+    G = nx.Graph()
+    with open("../graphs/p2p-Gnutella31.txt") as f:
+        for line in f.readlines():
+            if line[0] == '#':
+                continue
+            src, dest = line.split()
+            if src in mapped:
+                src = mapped[src]
+            else:      
+                mapped[src] = i
+                src = mapped[src]
+                i += 1
+
+            if dest in mapped:
+                dest = mapped[dest]
+            else:      
+                mapped[dest] = i
+                dest = mapped[dest]
+                i += 1
+
+            G.add_edge(src, dest)
+    
+    G2 = nx.to_scipy_sparse_matrix(G, format='csc')
+    np.savetxt("graph_data/06_gnutella_weakly_weights.txt", G2.data)
+    np.savetxt("graph_data/06_gnutella_weakly_indices.txt", G2.indices)
+    np.savetxt("graph_data/06_gnutella_weakly_offsets.txt", G2.indptr)
+
 patch_email()
 patch_wiki_vote()
 patch_bitcoin()
 patch_hepth()
 patch_ca_HepPh()
 patch_gnutella()
+
+patch_bitcoin_weakly()
+patch_gnutella_weakly()
+patch_hepth_weakly()
+patch_wiki_vote_weakly()

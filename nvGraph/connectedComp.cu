@@ -1,5 +1,7 @@
 #include <nvgraph.h>
 #include <stdio.h> 
+#include <sys/time.h>
+#include <time.h>
 
 void check(nvgraphStatus_t status) {
     if (status != NVGRAPH_STATUS_SUCCESS) {
@@ -20,6 +22,11 @@ int main(int argc, char *argv[]) {
     int i;
     float *sssp_1_h;
     void** vertex_dim;
+
+    /*Declare time based variables*/
+    struct timeval tv1, tv2;
+    struct timezone tz;
+    long int total_time = 0;
 
     /*Assign Variables*/
     n = atoi(argv[1]);
@@ -110,9 +117,11 @@ int main(int argc, char *argv[]) {
         }
         else connected_components[location]++;
     }
+
+    gettimeofday(&tv1,&tz); // Get starting time
     
     while(1){
-        /*Calculte SSSP*/
+        /*Calculate SSSP*/
         check(nvgraphSssp(handle, graph, 0, &source_vert, 0));
         check(nvgraphGetVertexData(handle, graph, (void*)sssp_1_h, 0));
 
@@ -137,6 +146,10 @@ int main(int argc, char *argv[]) {
 
         if(source_vert == -1) break;
     }
+
+    gettimeofday(&tv2,&tz); // Get ending time
+    total_time = (tv2.tv_sec-tv1.tv_sec)*1000000 + (tv2.tv_usec-tv1.tv_usec);
+    printf("Time: %ld\n", total_time);
 
     /*Write the Shortest Path to a file*/
     results = fopen(argv[6], "w+");

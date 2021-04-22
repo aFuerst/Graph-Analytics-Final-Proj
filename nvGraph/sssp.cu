@@ -17,7 +17,7 @@ int main(int argc, char *argv[]) {
 
     const size_t vertex_numsets = 1, edge_numsets = 1;
     size_t n, nnz;
-    int i;
+    int i, *sssp_1_h_total;
     float *sssp_1_h;
     void** vertex_dim;
 
@@ -67,6 +67,10 @@ int main(int argc, char *argv[]) {
 
     // Init host data
     sssp_1_h = (float*)malloc(n*sizeof(float));
+    sssp_1_h_total = (int*)malloc(n*sizeof(int));
+    for (i = 0; i < n; i++) {
+        sssp_1_h_total[i] = 0;
+    }
     vertex_dim = (void**)malloc(vertex_numsets*sizeof(void*));
     vertex_dimT = (cudaDataType_t*)malloc(vertex_numsets*sizeof(cudaDataType_t));
     CSC_input = (nvgraphCSCTopology32I_t) malloc(sizeof(struct nvgraphCSCTopology32I_st));
@@ -86,16 +90,27 @@ int main(int argc, char *argv[]) {
     check(nvgraphSetEdgeData(handle, graph, (void*)weights_h, 0));
 
     // Solve
-    int source_vert = 7107;
+    int source_vert = 0;
     check(nvgraphSssp(handle, graph, 0, &source_vert, 0));
 
     // Get and print result
     check(nvgraphGetVertexData(handle, graph, (void*)sssp_1_h, 0));
 
+    /*Find Diameter and Calculate SSSP Count*/
+    int diameter = 0;
+    for (i = 0; i < n; i++){
+        if(sssp_1_h[i] < 3402823466){
+            sssp_1_h_total[(int)sssp_1_h[i]]++;
+            if(diameter < sssp_1_h[i]) diameter = sssp_1_h[i];
+        }
+    }
+
+    printf("Diameter: %d\n", diameter);
+
     /*Write the Shortest Path to a file*/
     results = fopen(argv[6], "w+");
-    for (int i = 0; i < n; i++){
-        fprintf(results, "%.10g\n", sssp_1_h[i]);
+    for (i = 0; i <= diameter; i++){
+        fprintf(results, "%d\n", sssp_1_h_total[i]);
     }
     fclose(results);
 

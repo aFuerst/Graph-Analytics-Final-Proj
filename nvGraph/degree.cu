@@ -41,14 +41,22 @@ int main(int argc, char *argv[]) {
     destination_offsets_h[n] = nnz;
 
     /*Calculate Degree*/
+    int *degree_total = (int*)malloc(n*sizeof(int));
+    for (i = 0; i < n; i++) {
+        degree_total[i] = 0;
+    }
+
+    int max_degree = 0;
     for (i = 0; i < n; i++) {
         degree[i] = destination_offsets_h[i+1] - destination_offsets_h[i];
+        if(max_degree < degree[i]) max_degree = degree[i];
+        degree_total[degree[i]]++;
     }
 
     /*Write the Shortest Path to a file*/
     results = fopen(argv[4], "w+");
-    for (int i = 0; i < n; i++){
-        fprintf(results, "%d\n", degree[i]);
+    for (int i = 0; i <= max_degree; i++){
+        fprintf(results, "%d\n", degree_total[i]);
     }
     fclose(results);
     
