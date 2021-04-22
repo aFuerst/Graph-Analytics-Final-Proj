@@ -19,7 +19,7 @@ double LAGraph_toc(const double tic [2]);
 void LAGraph_tic(const double tic [2]);
 void CUST_OK(GrB_Info p);
 GrB_Info AllPairsShortestPath(GrB_Matrix matrix, GrB_Matrix *apsp, double *time, int total_samples, double *sample_times);
-GrB_Info SaveAPSPData(int total_samples, double total_time, double *timedata, const char *dataset);
+GrB_Info SaveAPSPData(int total_samples, double total_time, double *timedata, const char *dataset, GrB_Matrix apsp);
 
 const char *graph_names[] = {"gnutella", "wikivote", "hepth", "bitcoin", "enron", "hepph"};
 GrB_Info LoadHepTh(GrB_Matrix *matrix);
@@ -217,14 +217,21 @@ void RunTimes(const char *graph_name, GrB_Info (*load_func)(GrB_Matrix *matrix))
   time = 0;
   int tot_samples=100;
   double *sample_times = malloc(sizeof(double)*tot_samples);
+  CUST_OK(GrB_Matrix_new(&apsp, GrB_UINT32, tot_samples, nrows));
   CUST_OK(AllPairsShortestPath(matrix, &apsp, &time, tot_samples, sample_times));
-  CUST_OK(SaveAPSPData(tot_samples, time, sample_times, graph_name));
+
+  GrB_Index apsp_nrows, apsp_ncols;
+  CUST_OK(GrB_Matrix_nrows(&apsp_nrows, apsp));
+  CUST_OK(GrB_Matrix_ncols(&apsp_ncols, apsp));
+  // printf("ret APSP %lu ncols, %lu nrows\n", apsp_ncols, apsp_nrows);
+
+  CUST_OK(SaveAPSPData(tot_samples, time, sample_times, graph_name, apsp));
   free(sample_times);
   printf("APSP time: %f\n", time);
 
   CUST_OK(GrB_free(&vec_output));
   CUST_OK(GrB_free(&mat_output));
-  // CUST_OK(GrB_free(&apsp));
+  CUST_OK(GrB_free(&apsp));
   CUST_OK(GrB_free(&matrix));
 }
 

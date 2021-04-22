@@ -118,13 +118,13 @@ GrB_Info LoadBitcoinOTC(GrB_Matrix *matrix) {
   // Edges 	35,592
   int expected_nodes = 5881;
   GrB_Index const NUM_NODES = 5881;
-  GrB_Info g = GrB_Matrix_new(matrix, GrB_BOOL, NUM_NODES, NUM_NODES);
+  GrB_Info g = GrB_Matrix_new(matrix, GrB_INT32, NUM_NODES, NUM_NODES);
 
-  for (GrB_Index i=0; i < NUM_NODES; ++i) {
-    for (GrB_Index j=0; j < NUM_NODES; ++j) {
-      GrB_Matrix_setElement(*matrix, (bool)false, i, j);
-    }
-  }
+  // for (GrB_Index i=0; i < NUM_NODES; ++i) {
+  //   for (GrB_Index j=0; j < NUM_NODES; ++j) {
+  //     GrB_Matrix_setElement(*matrix, 1, i, j);
+  //   }
+  // }
 
   if(g != GrB_SUCCESS) {
     printf("new error %d\n", g);
@@ -169,7 +169,7 @@ GrB_Info LoadBitcoinOTC(GrB_Matrix *matrix) {
     }
 
 
-    GrB_Info set = GrB_Matrix_setElement(*matrix, (bool)true, src, dest);
+    GrB_Info set = GrB_Matrix_setElement(*matrix, 1, src, dest);
     edges += 1;
     if(set != GrB_SUCCESS) {
       printf("set error '%d', src:%ld, dest:%ld\n", set, src, dest);

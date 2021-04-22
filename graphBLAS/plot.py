@@ -8,6 +8,7 @@ mpl.rcParams.update({"font.size": 14})
 mpl.use("Agg")
 import matplotlib.pyplot as plt
 import argparse
+from matplotlib.ticker import MaxNLocator
 
 graphs = ["gnutella", "wikivote", "hepth", "bitcoin", "enron", "hepph"]
 data = "./savedata"
@@ -40,7 +41,8 @@ def plot_distribution(data, xlabel='', ylabel='', title='', xlog=True, ylog=True
   plt.title(title)
   if filename != "":
     fig.savefig(filename, bbox_inches="tight")
-  
+  plt.close(fig)
+
 def plotConnectedComponents(file, graph):
   components = defaultdict(int)
   with open(file) as f:
@@ -75,10 +77,25 @@ def plotDegrees(file, graph):
     r = reader(f)
     for node, deg in r:
       deg = int(float(deg))
+      if deg == 0:
+        break
       degrees.append(deg)
   plot_distribution(degrees, xlabel="Degree ($k$)",
                     ylabel="Number of nodes with degree $k$ ($N_k$)", title="Degree distributions for {}".format(graph),
                     filename="../figs/graphBLAS/degree-distrib-{}.png".format(graph))
+
+
+def plotShortestPaths(file, graph):
+  dist_cnts = []
+  with open(file) as f:
+    i = 1
+    for dist_cnt in f.readlines():
+      dist_cnt = int(dist_cnt)
+      dist_cnts += [i]*dist_cnt
+  plot_distribution(dist_cnts, xlabel='Shortest path lengths (hops)', 
+                  ylabel='Number of paths', title='Shortest path lengths distributions',
+                      xlog=False, ylog=False, showLine=True, intAxis=True,
+                    filename="../figs/graphBLAS/shortest-path-distrib-{}.png".format(graph))
 
 
 for graph in graphs:
@@ -90,3 +107,5 @@ for graph in graphs:
       plotConnectedComponents(file, graph)
     elif "ClusteringCoeff" in file:
       plotClusteringCoeff(file, graph)
+    elif "sp_dist" in file:
+      plotShortestPaths(file, graph)
