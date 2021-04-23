@@ -12,14 +12,14 @@ void check(nvgraphStatus_t status) {
 
 int main(int argc, char **argv) {
     /*Check Errors*/
-    if(argc != 6){
+    if(argc != 5){
         printf("Arguments should be in following order:\n");
-        printf("<# Vertices> <# Edges> <Offset txt File> <Indices txt File> <Save Name>\n");
+        printf("<# Vertices> <# Edges> <Offset txt File> <Indices txt File>\n");
         return 1;
     }
 
     size_t n, nnz;
-    int i, j, k;
+    int i;
 
     /*Declare time based variables*/
     struct timeval tv1, tv2;
@@ -31,7 +31,7 @@ int main(int argc, char **argv) {
     nnz = atoi(argv[2]);
 
     /*Open Files*/
-    FILE *offsets, *indices, *results;
+    FILE *offsets, *indices;
     offsets = fopen(argv[3], "r");
     indices = fopen(argv[4], "r");
 
@@ -39,10 +39,6 @@ int main(int argc, char **argv) {
     int destination_offsets_h[n+1];
     float source_indices[nnz];
     int source_indices_h[nnz];
-    int *subvertices;
-    int flag;
-    float *clustering;
-    int numvertices;
     uint64_t trcount;
 
     for (i = 0; i < nnz; i++) {        
@@ -64,13 +60,11 @@ int main(int argc, char **argv) {
 
     // nvgraph variables
     nvgraphHandle_t handle;
-    nvgraphGraphDescr_t graph, subgraph;
+    nvgraphGraphDescr_t graph;
     nvgraphCSCTopology32I_t CSC_input;
 
     // Init host data
     CSC_input = (nvgraphCSCTopology32I_t) malloc(sizeof(struct nvgraphCSCTopology32I_st));
-    subvertices = (int*)malloc(n*sizeof(int));
-    clustering = (float*)malloc(n*sizeof(float));
 
     check(nvgraphCreate(&handle));
     check(nvgraphCreateGraphDescr (handle, &graph));
@@ -82,55 +76,22 @@ int main(int argc, char **argv) {
     // Set graph connectivity
     check(nvgraphSetGraphStructure(handle, graph, (void*)CSC_input, NVGRAPH_CSC_32));
 
-    // Iterate through vertices and calculate clustering coefficient
+    // Count Triangles 100 times to grab time
+    gettimeofday(&tv1,&tz); // Get starting time
     for (i = 0; i < 100; i++) {
-        numvertices = destination_offsets_h[i+1] - destination_offsets_h[i] + 1;
-        /*Fill subvertices*/
-        if (numvertices == 1)       clustering[i] = 0;            
-        else if (numvertices == 2)  clustering[i] = 0; 
-        else{
-            /*Fill subvertices*/
-            flag = 0;
-            k = 0;
-            for(j = 0; j < numvertices; j++){
-                subvertices[j] = source_indices_h[destination_offsets_h[i]+k];
-                k++;
-                if(flag == 0) {
-                    if(subvertices[j] > i){
-                        subvertices[j + 1] = subvertices[j];
-                        subvertices[j] = i;
-                        j++;
-                        flag = 1;
-                    }
-                }
-            }
-
-            if(flag == 0) subvertices[numvertices-1] = i;
-printf("Vert: %d\n", numvertices);
-printf("i = %d >> %d %d %d || %d %d %d\n", i, subvertices[0], subvertices[1],  subvertices[2], subvertices[numvertices-2], subvertices[numvertices-1], subvertices[numvertices]);
-            /*Create Subgraph*/
-            check(nvgraphExtractSubgraphByVertex(handle, graph, subgraph, subvertices, numvertices));
-            /*Count Trianngles*/
-            trcount = 0;
+        /*Count Triangles*/
+        trcount = 0;
     
-            check(nvgraphTriangleCount(handle, subgraph, &trcount));
-printf("/_: %ld\n", trcount);
-            /*Fill Clustering Coefficient*/
-            clustering[i] = (float)trcount / (numvertices - 1);
-printf("Clust: %.6f\n", clustering[i]);
-        }
-    }
-    
-    /*Write the Shortest Path to a file*/
-    results = fopen(argv[5], "w+");
-    for (int i = 0; i <= n; i++){
-        fprintf(results, "%.6f\n", clustering[i]);
-    }
-    fclose(results);
+        check(nvgraphTriangleCount(handle, graph, &trcount));
+    }    
+    gettimeofday(&tv2,&tz); // Get ending time
+    /*Calculate time taken in microseconds*/
+    total_time = (tv2.tv_sec-tv1.tv_sec)*1000000 + (tv2.tv_usec-tv1.tv_usec);
+    printf("Average Time: %ld\n", total_time/100);
+    printf("Triangle Count: %ld\n", trcount);
 
-    free(CSC_input); free(subvertices); free(clustering);
+    free(CSC_input);
     check(nvgraphDestroyGraphDescr(handle, graph));
-    check(nvgraphDestroyGraphDescr(handle, subgraph));
     check(nvgraphDestroy(handle));
     return 0;
 }

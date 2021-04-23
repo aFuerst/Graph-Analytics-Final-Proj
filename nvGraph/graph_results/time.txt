@@ -18,6 +18,14 @@ Connected Components
 708161
 14338
 2165
-
+N/A
 175654
 8952
+
+Clustering - triangle Counting (Average)
+1948
+1715
+619
+2687
+1531
+1581
