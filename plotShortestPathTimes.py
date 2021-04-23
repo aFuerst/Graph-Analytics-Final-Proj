@@ -43,7 +43,7 @@ def plotShortestPathTimes(graph):
   fig, ax = plt.subplots()
   plt.tight_layout()
   fig.set_size_inches(5,3)
-  ax.boxplot([gb_data[graph], cu_data[graph]], labels=["nvGraph", "graphBLAS"], vert=False, showfliers=False)
+  ax.boxplot([gb_data[graph], cu_data[graph]], labels=["graphBLAS", "nvGraph"], vert=False, showfliers=False)
 
   ax.set_xlabel("Iteration Time (s)")
   ax.set_xscale ('log')
