@@ -1,41 +1,41 @@
 Running with 46 threads
 Running gnutella
 Reading Matrix Market file: ../graphs/p2p-Gnutella31-patched.mtx
-Degree time: 0.003279
-CC time: 0.493345
+Degree time: 0.014144
+CC time: 0.272898
 Reading Matrix Market file: ../graphs/p2p-Gnutella31-patched.mtx
-Clustering time: 0.141110
-APSP time: 6.328427
+Clustering time: 0.145714
+APSP time: 5.659216
 Running wikivote
 Reading Matrix Market file: ../graphs/wiki-Vote-patched.mtx
-Degree time: 0.001182
-CC time: 0.190236
+Degree time: 0.001052
+CC time: 0.173903
 Reading Matrix Market file: ../graphs/wiki-Vote-patched.mtx
-Clustering time: 0.040353
-APSP time: 0.273722
+Clustering time: 0.060727
+APSP time: 0.173980
 Running hepth
 Reading Matrix Market file: ../graphs/cit-HepTh-patched.mtx
-Degree time: 0.053300
-CC time: 0.389559
+Degree time: 0.046043
+CC time: 0.217830
 Reading Matrix Market file: ../graphs/cit-HepTh-patched.mtx
-Clustering time: 0.337225
-APSP time: 1.556828
+Clustering time: 0.235474
+APSP time: 1.255245
 Running bitcoin
-Degree time: 0.000401
-CC time: 0.264421
-Clustering time: 0.012940
-APSP time: 0.423252
+Degree time: 0.000314
+CC time: 0.141357
+Clustering time: 0.005540
+APSP time: 0.239715
 Running enron
 Reading Matrix Market file: ../graphs/email-Enron-patched.mtx
-Degree time: 0.028589
-CC time: 0.506168
+Degree time: 0.020369
+CC time: 0.182183
 Reading Matrix Market file: ../graphs/email-Enron-patched.mtx
-Clustering time: 0.181811
-APSP time: 5.753740
+Clustering time: 0.094498
+APSP time: 6.096405
 Running hepph
 Reading Matrix Market file: ../graphs/ca-HepPh-patched.mtx
-Degree time: 0.014449
-CC time: 0.233816
+Degree time: 0.010668
+CC time: 0.114916
 Reading Matrix Market file: ../graphs/ca-HepPh-patched.mtx
-Clustering time: 0.114107
-APSP time: 1.097761
+Clustering time: 0.091281
+APSP time: 0.768589

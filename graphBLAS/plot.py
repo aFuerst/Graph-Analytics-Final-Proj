@@ -92,10 +92,12 @@ def plotShortestPaths(file, graph):
     for dist_cnt in f.readlines():
       dist_cnt = int(dist_cnt)
       dist_cnts += [i]*dist_cnt
+      i += 1
+
   plot_distribution(dist_cnts, xlabel='Shortest path lengths (hops)', 
                   ylabel='Number of paths', title='Shortest path lengths distributions',
                       xlog=False, ylog=False, showLine=True, intAxis=True,
-                    filename="../figs/graphBLAS/shortest-path-distrib-{}.png".format(graph))
+                    filename="../figs/graphBLAS/sssp-{}.png".format(graph))
 
 
 for graph in graphs:
