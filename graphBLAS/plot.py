@@ -62,9 +62,15 @@ def plotClusteringCoeff(file, graph):
   with open(file) as f:
     f.readline()
     r = reader(f)
+    bad = 0
     for node, coef in r:
       coef = float(coef)
+      if coef > 1.0:
+        bad += 1
+        continue
       clustering.append(coef)
+  if bad > 0:
+    print(graph, "bad", bad)
   plot_distribution(clustering, xlabel='Clustering coefficient',
                   ylabel='Number of vertices', title='Clustering coefficient distributions',
                   xlog=False, ylog=True, showLine=False,
