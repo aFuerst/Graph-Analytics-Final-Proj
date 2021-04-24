@@ -43,10 +43,14 @@ def plotShortestPathTimes(graph):
   fig, ax = plt.subplots()
   plt.tight_layout()
   fig.set_size_inches(5,3)
-  ax.boxplot([gb_data[graph], cu_data[graph]], labels=["graphBLAS", "nvGraph"], vert=False, showfliers=False)
+  bp = ax.boxplot([gb_data[graph], cu_data[graph]], labels=["graphBLAS", "nvGraph"], vert=False, showfliers=False, patch_artist=True)
+
+  colors = ['lightgreen', 'lightblue']
+  for patch, color in zip(bp['boxes'], colors):
+      patch.set_facecolor(color)
 
   ax.set_xlabel("Iteration Time (s)")
-  ax.set_xscale ('log')
+  # ax.set_xscale ('log')
   # ax.set_xlabel("")
   # ax.legend(bbox_to_anchor=(1,.6), loc="right", columnspacing=1)
   plt.savefig("./figs/shortestpath_iter_times/sp-times-{}.png".format(graph), bbox_inches="tight")
