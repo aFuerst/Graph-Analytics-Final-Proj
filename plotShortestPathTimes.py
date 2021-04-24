@@ -27,7 +27,7 @@ def load_gb_data(file):
     r = reader(f)
     for node, time in r:
       time = float(time)
-      data.append(time)
+      data.append(time * 1000)
   return data
 
 def load_cu_data(file):
@@ -36,7 +36,8 @@ def load_cu_data(file):
     for d in f.readlines():
       d = int(d)
       # data is in # of microseconds
-      data.append(d / 1000000)
+      data.append(d / 1000)
+      # data.append(d / 1000000)
   return data
 
 def plotShortestPathTimes(graph):
@@ -49,8 +50,9 @@ def plotShortestPathTimes(graph):
   for patch, color in zip(bp['boxes'], colors):
       patch.set_facecolor(color)
 
-  ax.set_xlabel("Iteration Time (s)")
+  ax.set_xlabel("Iteration Time (ms)")
   # ax.set_xscale ('log')
+  plt.setp(ax.get_xticklabels(), rotation=30, horizontalalignment='right')
   # ax.set_xlabel("")
   # ax.legend(bbox_to_anchor=(1,.6), loc="right", columnspacing=1)
   plt.savefig("./figs/shortestpath_iter_times/sp-times-{}.png".format(graph), bbox_inches="tight")
