@@ -38,7 +38,7 @@ def plot_distribution(data, xlabel='', ylabel='', title='', xlog=True, ylog=True
       gca.xaxis.set_major_locator(MaxNLocator(integer=True))
   ax.set_xlabel(xlabel)
   ax.set_ylabel(ylabel)
-  plt.title(title)
+  # plt.title(title)
   if filename != "":
     fig.savefig(filename, bbox_inches="tight")
   plt.close(fig)
